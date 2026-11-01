@@ -26,11 +26,11 @@ jobs:
           cp index.html www/ 2>/dev/null || true
           cp -r js css assets img 2>/dev/null || true
 
-      - name: Set up JDK 17
+      - name: Set up JDK 18
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '18'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
