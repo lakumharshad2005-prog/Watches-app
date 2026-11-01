@@ -1,4 +1,3 @@
-
 name: Build Android debug APK
 
 on:
@@ -36,24 +35,24 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Clear Gradle Cache
-        run: rm -rf ~/.gradle/caches/ ~/.gradle/wrapper/
-
       - name: Add Android Platform and Sync
         run: |
-          npx --yes @capacitor/cli add android || true
+          rm -rf android/
+          npx --yes @capacitor/cli add android
           npx --yes @capacitor/cli sync android
 
-      - name: Fix Gradle Build & Compile APK
+      - name: Force Clean and Build APK
         run: |
           cd android
           chmod +x gradlew
-          # Clean any locked/corrupted daemons or locks
-          ./gradlew --stop || true
-          ./gradlew clean assembleDebug --no-daemon --refresh-dependencies
+          # Force gradle to ignore corrupted checksums and rebuild jars cleanly
+          ./gradlew assembleDebug --refresh-dependencies --no-daemon -Dorg.gradle.daemon=false
+        env:
+          ORG_GRADLE_PROJECT_kotlin_version: '1.9.24'
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          
