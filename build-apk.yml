@@ -1,0 +1,52 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Validate app URL
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "Set repository variable APP_URL to your deployed HTTPS URL."
+            exit 1
+          fi
+          case "$APP_URL" in https://*) ;; *) echo "APP_URL must start with https://"; exit 1;; esac
+      - name: Configure Capacitor to use deployed app
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          cd mobile
+          node -e "const fs=require('fs'); const c=require('./capacitor.config.json'); c.server.url=process.env.APP_URL.replace(/\\/$/,''); fs.writeFileSync('capacitor.config.json', JSON.stringify(c,null,2)+'\\n')"
+          mkdir -p www
+          cp ../public/index.html www/index.html
+          cp ../public/manifest.json www/manifest.json
+          cp ../public/icon.svg www/icon.svg
+          npm install
+          npx cap add android
+          npx cap sync android
+      - name: Build debug APK
+        run: |
+          cd mobile/android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: watch-apk
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk

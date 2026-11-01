@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: watch
+    runtime: docker
+    plan: starter          # persistent disk needs a paid plan
+    healthCheckPath: /
+    envVars:
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /data
+      - key: SECRET
+        generateValue: true
+    disk:
+      name: watch-data
+      mountPath: /data
+      sizeGB: 5

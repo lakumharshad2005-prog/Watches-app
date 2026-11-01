@@ -1,0 +1,7 @@
+data/
+node_modules/
+mobile/node_modules/
+mobile/android/
+mobile/www/
+*.apk
+.DS_Store

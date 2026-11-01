@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Watch</title>
+<link rel="manifest" href="/manifest.json">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#e11d48">
+<style>
+:root{--bg:#fff;--card:#f3f4f6;--tx:#111;--mut:#6b7280;--ac:#e11d48;--bd:#e5e7eb;--ok:#10b981}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f0f12;--card:#1c1c22;--tx:#f5f5f5;--mut:#9ca3af;--bd:#2a2a32}}
+:root[data-theme="dark"]{--bg:#0f0f12;--card:#1c1c22;--tx:#f5f5f5;--mut:#9ca3af;--bd:#2a2a32}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overscroll-behavior:none}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;max-width:560px;margin:0 auto;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg);z-index:5}
+header b{font-size:22px;color:var(--ac);letter-spacing:.5px}
+main{flex:1;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch}
+nav{display:flex;border-top:1px solid var(--bd);background:var(--bg);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:8px 0;background:none;border:0;color:var(--mut);font-size:11px;cursor:pointer}
+nav button span{display:block;font-size:22px}
+nav button.on{color:var(--ac)}
+.stories{display:flex;gap:12px;padding:12px;overflow-x:auto;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.st{text-align:center;font-size:11px;color:var(--mut);flex:none;width:64px}
+.ring{width:58px;height:58px;border-radius:50%;padding:2px;background:conic-gradient(#f59e0b,#e11d48,#7c3aed,#f59e0b);margin:0 auto 4px}
+.ring.seen{background:var(--bd)}
+.ring i,.ring img{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;border:2px solid var(--bg);font-style:normal;font-size:20px;color:#fff;object-fit:cover}
+.post{border-bottom:8px solid var(--card)}
+.ph{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:none;background-size:cover;background-position:center;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.ph small{display:block;color:var(--mut);font-size:12px}
+.md{width:100%;aspect-ratio:1/1;display:grid;place-items:center;font-size:64px;color:#fff;overflow:hidden;position:relative;background:#111}
+.md img,.md video{width:100%;height:100%;object-fit:cover}
+.tx{padding:10px 12px 12px;font-size:17px;white-space:pre-wrap}
+.cap{padding:4px 12px 8px;font-size:14px}
+.acts{display:flex;gap:4px;padding:4px 8px;align-items:center}
+.acts button,.rail button{background:none;border:0;color:inherit;font-size:14px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.acts .sv{margin-left:auto}
+.on-l{color:var(--ac)!important}
+.reels{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;background:#000}
+.reel{height:100%;scroll-snap-align:start;position:relative;display:grid;place-items:center;color:#fff;overflow:hidden}
+.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel .big{font-size:80px;opacity:.85}
+.rin{position:absolute;left:12px;right:70px;bottom:20px;text-shadow:0 1px 4px #000a;z-index:2}
+.rail{position:absolute;right:6px;bottom:24px;display:flex;flex-direction:column;gap:12px;align-items:center;color:#fff;z-index:2}
+.rail button{flex-direction:column;font-size:11px;text-shadow:0 1px 3px #000a}
+.rail button span{font-size:26px}
+.vc{padding:0 0 14px;cursor:pointer}
+.th{position:relative;width:100%;aspect-ratio:16/9;display:grid;place-items:center;font-size:48px;color:#fff;overflow:hidden;background:#111}
+.th video,.th img{width:100%;height:100%;object-fit:cover}
+.dur{position:absolute;right:8px;bottom:8px;background:#000b;font-size:12px;padding:2px 6px;border-radius:4px}
+.vi{display:flex;gap:10px;padding:8px 12px}
+.btn{background:var(--tx);color:var(--bg);border:0;border-radius:18px;padding:7px 14px;font-weight:600;cursor:pointer;font-size:13px}
+.btn.sub{background:var(--card);color:var(--tx)}
+.btn.ac{background:var(--ac);color:#fff}
+.pad{padding:14px}
+input,textarea{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px;font:inherit;margin:6px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;border-bottom:1px solid var(--bd)}
+.tabs button{flex:1;padding:10px;background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);cursor:pointer;font-weight:600}
+.tabs button.on{color:var(--tx);border-color:var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.grid .g{aspect-ratio:1;display:grid;place-items:center;font-size:28px;color:#fff;overflow:hidden;cursor:pointer;background:#222}
+.grid img,.grid video{width:100%;height:100%;object-fit:cover}
+.sheet{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:30}
+.sheet>div{background:var(--bg);width:100%;max-width:560px;max-height:75%;border-radius:16px 16px 0 0;display:flex;flex-direction:column;padding:14px}
+.cl{overflow-y:auto;flex:1;max-height:45vh}
+.cm{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:20px;z-index:40;font-size:13px;white-space:nowrap}
+.big-av{width:84px;height:84px;font-size:32px;cursor:pointer}
+.stat{display:flex;gap:22px;text-align:center}
+.stat b{display:block;font-size:17px}
+.stat span{color:var(--mut);font-size:12px}
+/* Story viewer */
+.story-view{position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;color:#fff}
+.sv-top{display:flex;gap:4px;padding:10px 8px 0;padding-top:calc(10px + env(safe-area-inset-top))}
+.sv-bar{flex:1;height:3px;background:#fff4;border-radius:2px;overflow:hidden}
+.sv-bar i{display:block;height:100%;width:0;background:#fff;transition:width .05s linear}
+.sv-bar.done i{width:100%}
+.sv-bar.run i{animation:svfill 5s linear forwards}
+@keyframes svfill{to{width:100%}}
+.sv-body{flex:1;display:grid;place-items:center;position:relative}
+.sv-body img,.sv-body video{max-width:100%;max-height:100%;object-fit:contain}
+.sv-user{position:absolute;top:16px;left:12px;display:flex;align-items:center;gap:8px;text-shadow:0 1px 3px #000}
+.sv-close{position:absolute;top:12px;right:12px;font-size:28px;background:none;border:0;color:#fff;cursor:pointer}
+/* Explore */
+.ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
+.ex-grid .g{aspect-ratio:1;overflow:hidden;cursor:pointer;background:#111}
+.ex-grid img,.ex-grid video{width:100%;height:100%;object-fit:cover}
+/* Video player better */
+.player{position:relative;background:#000;width:100%;aspect-ratio:16/9}
+.player video{width:100%;height:100%;object-fit:contain}
+.player .ctrls{position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:linear-gradient(transparent,#000a);display:flex;align-items:center;gap:8px;color:#fff}
+.player .ctrls button{background:none;border:0;color:#fff;font-size:18px;cursor:pointer}
+.progress{flex:1;height:4px;background:#fff4;border-radius:2px;cursor:pointer}
+.progress i{display:block;height:100%;background:var(--ac);width:0;border-radius:2px}
+.full-player{position:fixed;inset:0;background:#000;z-index:40;display:flex;flex-direction:column}
+.full-player video{flex:1;width:100%;object-fit:contain}
+.full-player .info{padding:12px;color:#fff}
+</style>
+</head>
+<body>
+<header>
+  <b>▶ Watch</b>
+  <input id="q" placeholder="🔍 Search…" maxlength="40" style="margin:0 10px;flex:1;max-width:180px">
+  <button class="btn sub" id="th" title="Theme">🌓</button>
+</header>
+<main id="main"></main>
+<nav id="nav"></nav>
+<input type="file" id="avf" accept="image/*" hidden>
+<input type="file" id="storyf" accept="image/*,video/*" hidden>
+<script>
+const $=s=>document.querySelector(s);
+const G=['#7c3aed,#db2777','#0ea5e9,#6366f1','#f59e0b,#ef4444','#10b981,#0ea5e9','#ec4899,#f97316','#8b5cf6,#06b6d4'];
+const gr=i=>`linear-gradient(135deg,${G[i%G.length]})`;
+let uid=1000, file=null, kind='post', storyFile=null;
+
+const S={
+  tab:'home', pt:'posts', watch:null, sheet:null, storyView:null, stories:[],
+  me:{name:'',bio:'',av:null}, subs:{}, fol:{}, blocked:[], posts:[], user:null, explore:[]
+};
+let BASE = '';
+const abs = u => (BASE && u && u.startsWith('/')) ? BASE + u : u;
+
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const av=(n,src)=> {
+  if(src) return `<div class="av"><img src="${src}" alt=""></div>`;
+  return `<div class="av" style="background:${gr((n||'?').charCodeAt(0))}">${esc((n||'?')[0].toUpperCase())}</div>`;
+};
+const P=id=>S.posts.find(p=>p.id==id) || S.explore.find(p=>p.id==id);
+
+function media(p,ctl){
+  if(p.src && p.t==='video') return `<video src="${abs(p.src)}" ${ctl?'controls playsinline preload="metadata"':'muted playsinline loop preload="metadata"'} ${ctl?'':'autoplay'}></video>`;
+  if(p.src) return `<img src="${abs(p.src)}" alt="" loading="lazy" decoding="async">`;
+  return `<span style="font-size:48px">${p.e||'✨'}</span>`;
+}
+
+function acts(p){
+  return `<div class="acts">
+    <button data-a="like" data-i="${p.id}" class="${p.liked?'on-l':''}">${p.liked?'❤️':'🤍'} ${p.likes+(p.liked?1:0)}</button>
+    <button data-a="cm" data-i="${p.id}">💬 ${p.cm?.length||0}</button>
+    <button data-a="sh" data-i="${p.id}">↗ Share</button>
+    <button class="sv ${p.saved?'on-l':''}" data-a="sv" data-i="${p.id}">${p.saved?'🔖':'🔖'}</button>
+  </div>`;
+}
+
+function head(p){
+  const me=p.u===S.user;
+  return `<div class="ph">${av(p.u, me?S.me.av:null)}
+    <div style="flex:1"><b>${esc(p.u)}</b><small>${p.k==='video'?'Video':p.k==='reel'?'Reel':'Post'} · ${timeAgo(p.ts)}</small></div>
+    ${me?`<button class="btn sub" data-a="del" data-i="${p.id}">🗑</button>`:
+      `<button class="btn sub" data-a="fol" data-i="${p.u}">${S.fol[p.u]?'Following':'Follow'}</button>
+       <button class="btn sub" data-a="rep" data-i="${p.id}">🚩</button>`}
+  </div>`;
+}
+
+function timeAgo(ts){
+  if(!ts) return 'hamna';
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'hamna';
+  if(s<3600) return Math.floor(s/60)+'m';
+  if(s<86400) return Math.floor(s/3600)+'h';
+  return Math.floor(s/86400)+'d';
+}
+
+function feedPost(p){
+  if(p.k==='text') return `<div class="post">${head(p)}<div class="tx">${esc(p.cap)}</div>${acts(p)}</div>`;
+  if(p.k==='reel'||p.k==='video'){
+    return `<div class="post">${head(p)}
+      <div class="th md" style="background:${gr(p.g||0)};aspect-ratio:16/9;cursor:pointer" data-a="${p.k==='reel'?'goreel':'play'}" data-i="${p.id}">
+        ${media(p)}${p.dur?`<span class="dur">${p.dur}</span>`:''}
+        ${p.views?`<span class="dur" style="left:8px;right:auto">${fmtViews(p.views)} views</span>`:''}
+      </div>
+      <div class="cap"><b>${esc(p.u)}</b> ${esc(p.cap)}</div>${acts(p)}</div>`;
+  }
+  return `<div class="post">${head(p)}
+    <div class="md" style="background:${gr(p.g||0)}" data-a="dblike" data-i="${p.id}">${media(p)}</div>
+    <div class="cap"><b>${esc(p.u)}</b> ${esc(p.cap)}</div>${acts(p)}</div>`;
+}
+
+function fmtViews(n){
+  if(n>=1e6) return (n/1e6).toFixed(1)+'M';
+  if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+  return n;
+}
+
+function home(){
+  const st = (S.stories||[]).map((s,i)=>{
+    const seen = false; // could track
+    return `<div class="st" data-a="openstory" data-i="${i}">
+      <div class="ring ${seen?'seen':''}">
+        ${s.av ? `<img src="${abs(s.av)}" alt="">` : `<i style="background:${gr(s.u.charCodeAt(0))}">${esc(s.u[0].toUpperCase())}</i>`}
+      </div>${esc(s.u===S.user?'Tamari':s.u)}
+    </div>`;
+  }).join('');
+  const posts = vis();
+  return `<div class="stories">
+    <div class="st" data-a="addstory"><div class="ring" style="background:var(--bd)"><i style="background:var(--card);color:var(--tx)">＋</i></div>Story</div>
+    ${st}
+  </div>` + (posts.length ? posts.map(feedPost).join('') : '<div class="pad" style="color:var(--mut)">હજુ કોઈ પોસ્ટ નથી. Create ટૅબમાં નવી પોસ્ટ બનાવો!</div>');
+}
+
+function reels(){
+  const r = vis().filter(p=>p.k==='reel');
+  if(!r.length) return '<div class="pad" style="color:#fff;background:#000;height:100%;display:grid;place-items:center">Haji koi reel nathi.</div>';
+  return `<div class="reels" id="reels">${r.map(p=>`
+    <div class="reel" id="r${p.id}" style="background:${gr(p.g||0)}">
+      ${p.src&&p.t==='video' ? `<video src="${abs(p.src)}" muted loop playsinline></video>` : `<div class="big">${p.e||'🎞'}</div>`}
+      <div class="rin"><b>@${esc(p.u)}</b><div>${esc(p.cap)}</div></div>
+      <div class="rail">
+        <button data-a="like" data-i="${p.id}" class="${p.liked?'on-l':''}"><span>${p.liked?'❤️':'🤍'}</span>${p.likes+(p.liked?1:0)}</button>
+        <button data-a="cm" data-i="${p.id}"><span>💬</span>${p.cm?.length||0}</button>
+        <button data-a="sh" data-i="${p.id}"><span>↗</span></button>
+        <button data-a="sv" data-i="${p.id}" class="${p.saved?'on-l':''}"><span>🔖</span></button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function videos(){
+  if(S.watch) return watchPage();
+  const list = vis().filter(p=>p.k==='video');
+  if(!list.length) return '<div class="pad">Haji koi video nathi. Create ma Video select kari upload karo.</div>';
+  return list.map(p=>`<div class="vc" data-a="play" data-i="${p.id}">
+    <div class="th" style="background:${gr(p.g||0)}">${media(p)}<span class="dur">${p.dur||'0:30'}</span>
+      ${p.views?`<span class="dur" style="left:8px;right:auto">${fmtViews(p.views)}</span>`:''}
+    </div>
+    <div class="vi">${av(p.u)}<div style="flex:1"><b>${esc(p.cap)}</b>
+      <div style="color:var(--mut);font-size:13px">${esc(p.u)} · ${fmtViews(p.views||0)} views</div></div>
+    </div></div>`).join('');
+}
+
+function watchPage(){
+  const p = P(S.watch); if(!p) return '';
+  const sub = S.subs[p.u];
+  // Count once per video opened in this page session, not on every render.
+  S._viewed = S._viewed || new Set();
+  if (!S._viewed.has(p.id)) {
+    S._viewed.add(p.id);
+    api('POST','/api/posts/view',{id:p.id}).catch(()=>{});
+  }
+  return `<div class="player">
+    ${p.src ? `<video id="wv" src="${abs(p.src)}" controls playsinline autoplay></video>` : `<div style="height:200px;display:grid;place-items:center;font-size:60px">${p.e}</div>`}
+  </div>
+  <div class="pad">
+    <b style="font-size:17px">${esc(p.cap)}</b>
+    <div style="color:var(--mut);font-size:13px;margin:4px 0 10px">${fmtViews(p.views||0)} views</div>
+    <div class="row">${av(p.u)}<b style="flex:1">${esc(p.u)}</b>
+      <button class="btn ${sub?'sub':''}" data-a="subs" data-i="${p.u}">${sub?'🔔 Subscribed':'Subscribe'}</button>
+    </div>
+  </div>
+  ${acts(p)}
+  <div class="pad"><button class="btn sub" data-a="back">← Pachha Videos</button></div>
+  <div class="pad"><b>Related</b></div>
+  ${vis().filter(x=>x.k==='video'&&x.id!==p.id).slice(0,4).map(x=>`
+    <div class="vc" data-a="play" data-i="${x.id}" style="display:flex;gap:10px;padding:8px 12px">
+      <div style="width:140px;aspect-ratio:16/9;background:${gr(x.g||0)};border-radius:6px;overflow:hidden;flex:none">${media(x)}</div>
+      <div><b style="font-size:13px">${esc(x.cap)}</b><div style="color:var(--mut);font-size:12px">${esc(x.u)}</div></div>
+    </div>`).join('')}`;
+}
+
+function explore(){
+  const list = S.explore.length ? S.explore : vis();
+  return `<div class="pad"><b>Explore</b><div style="color:var(--mut);font-size:13px">Popular posts, reels & videos</div></div>
+    <div class="ex-grid">${list.map(p=>`
+      <div class="g" style="background:${gr(p.g||0)}" data-a="${p.k==='reel'?'goreel':p.k==='video'?'play':'cm'}" data-i="${p.id}">
+        ${p.src ? media(p) : (p.e||'📝')}
+      </div>`).join('')}</div>
+    ${list.length?'':'<div class="pad" style="color:var(--mut)">Haji content nathi.</div>'}`;
+}
+
+function create(){
+  return `<div class="pad"><h3 style="margin-bottom:8px">Navu banavo</h3>
+    <textarea id="cap" rows="3" maxlength="300" placeholder="Shu chale chhe? Caption lakho…"></textarea>
+    <div class="row" style="margin:8px 0">
+      <label class="btn sub">📷 Photo / Video<input type="file" id="mf" accept="image/*,video/*" hidden></label>
+      <span id="fn" style="color:var(--mut);font-size:13px"></span>
+    </div>
+    <div style="margin:10px 0 6px;color:var(--mut);font-size:13px">Kya post karvu?</div>
+    <div class="row">
+      <button class="btn sub kb on" data-a="kind" data-i="post">📝 Post</button>
+      <button class="btn sub kb" data-a="kind" data-i="reel">🎞 Reel</button>
+      <button class="btn sub kb" data-a="kind" data-i="video">📺 Video</button>
+    </div>
+    <button class="btn ac" style="margin-top:16px;width:100%;padding:12px" data-a="publish">Publish karo</button>
+  </div>`;
+}
+
+function profile(){
+  const mine = S.posts.filter(p=>p.u===S.user);
+  const sv = S.posts.filter(p=>p.saved);
+  const list = S.pt==='posts' ? mine : sv;
+  return `<div class="pad">
+    <div class="row" style="gap:18px">
+      <div class="av big-av" id="pav" style="background:${S.me.av?`url(${abs(S.me.av)})`:gr(84)};background-size:cover">${S.me.av?'':'T'}</div>
+      <div class="stat">
+        <div><b>${mine.length}</b><span>Posts</span></div>
+        <div><b>${Object.keys(S.fol).filter(k=>S.fol[k]).length}</b><span>Following</span></div>
+        <div><b>${mine.reduce((a,p)=>a+(p.likes||0)+(p.liked?1:0),0)}</b><span>Likes</span></div>
+      </div>
+    </div>
+    <b style="display:block;margin-top:8px">@${esc(S.user)}</b>
+    <textarea id="bio" rows="2" maxlength="150" placeholder="Bio">${esc(S.me.bio)}</textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" data-a="savep">Save</button>
+      <button class="btn sub" data-a="logout">Logout</button>
+      <button class="btn sub" data-a="delacc">Account delete</button>
+    </div>
+    <div style="color:var(--mut);font-size:12px;margin-top:6px">Photo badalva avatar par tap karo.</div>
+  </div>
+  <div class="tabs">
+    <button class="${S.pt==='posts'?'on':''}" data-a="pt" data-i="posts">Mara Posts</button>
+    <button class="${S.pt==='saved'?'on':''}" data-a="pt" data-i="saved">Saved</button>
+  </div>
+  <div class="grid">${list.map(p=>`<div class="g" style="background:${gr(p.g||0)}" data-a="cm" data-i="${p.id}">${p.src?media(p):(p.e||'📝')}</div>`).join('')}</div>
+  ${list.length?'':'<div class="pad" style="color:var(--mut)">Haji kai nathi.</div>'}`;
+}
+
+function sheet(){
+  const p=P(S.sheet); if(!p) return '';
+  return `<div class="sheet" data-a="close"><div onclick="event.stopPropagation()">
+    <b style="margin-bottom:8px;display:block">Comments (${p.cm?.length||0})</b>
+    <div class="cl">${(p.cm||[]).map(c=>`<div class="cm">${av(c[0])}<div><b>${esc(c[0])}</b><div>${esc(c[1])}</div></div></div>`).join('')
+      || '<div style="color:var(--mut);padding:12px 0">Pehli comment tame karo!</div>'}</div>
+    <div class="row" style="flex-wrap:nowrap;margin-top:8px">
+      <input id="ci" maxlength="200" placeholder="Comment lakho…" autocomplete="off">
+      <button class="btn ac" data-a="send" data-i="${p.id}">Moklo</button>
+    </div>
+  </div></div>`;
+}
+
+function storyViewer(){
+  const sv = S.storyView; if(!sv) return '';
+  const user = S.stories[sv.userIdx]; if(!user) return '';
+  const item = user.items[sv.itemIdx]; if(!item) return '';
+  const isVid = item.src && (item.src.endsWith('.mp4')||item.src.endsWith('.webm'));
+  return `<div class="story-view">
+    <div class="sv-top">${user.items.map((_,i)=>`<div class="sv-bar ${i<sv.itemIdx?'done':''} ${i===sv.itemIdx?'run':''}"><i></i></div>`).join('')}</div>
+    <div class="sv-user">${av(user.u,user.av)}<b>${esc(user.u)}</b></div>
+    <button class="sv-close" data-a="closestory">×</button>
+    <div class="sv-body" data-a="storytap">
+      ${isVid ? `<video src="${abs(item.src)}" autoplay playsinline></video>` : `<img src="${abs(item.src)}" alt="">`}
+    </div>
+  </div>`;
+}
+
+const TABS = [
+  ['home','🏠','Home'],
+  ['reels','🎞','Reels'],
+  ['videos','📺','Videos'],
+  ['explore','🔍','Explore'],
+  ['add','➕','Create'],
+  ['me','👤','Profile']
+];
+
+let reelObserver = null;
+function render(){
+  if (reelObserver) { reelObserver.disconnect(); reelObserver = null; }
+  if(!S.user){ $('#nav').innerHTML=''; $('#main').innerHTML=authv(); return; }
+  $('#nav').innerHTML = TABS.map(t=>`<button data-a="tab" data-i="${t[0]}" class="${S.tab===t[0]?'on':''}"><span>${t[1]}</span>${t[2]}</button>`).join('');
+  const m = $('#main');
+  const sc = m.scrollTop;
+  m.style.overflowY = S.tab==='reels' ? 'hidden' : 'auto';
+  let html = '';
+  if(S.tab==='home') html = home();
+  else if(S.tab==='reels') html = reels();
+  else if(S.tab==='videos') html = videos();
+  else if(S.tab==='explore') html = explore();
+  else if(S.tab==='add') html = create();
+  else if(S.tab==='me') html = profile();
+  if(S.sheet) html += sheet();
+  if(S.storyView) html += storyViewer();
+  m.innerHTML = html;
+  if(S.tab!=='add' && !S.storyView) m.scrollTop = sc;
+
+  // auto play visible reel videos
+  if(S.tab==='reels'){
+    const vids = m.querySelectorAll('.reel video');
+    reelObserver = new IntersectionObserver(ents=>{
+      ents.forEach(e=>{ if(e.isIntersecting) e.target.play().catch(()=>{}); else e.target.pause(); });
+    },{threshold:0.6});
+    vids.forEach(v=>reelObserver.observe(v));
+  }
+}
+
+let toastT;
+function toast(t){
+  document.querySelectorAll('.toast').forEach(e=>e.remove());
+  const d=document.createElement('div'); d.className='toast'; d.textContent=t;
+  document.body.appendChild(d);
+  clearTimeout(toastT); toastT=setTimeout(()=>d.remove(),1800);
+}
+
+const vis = () => S.posts.filter(p => !S.blocked.includes(p.u) && (!Q || (p.cap+p.u).toLowerCase().includes(Q)));
+let Q = '';
+
+// ===== API layer =====
+const api = async (m,u,b,raw) => {
+  const h = {'X-W':'1'};
+  if(raw) h['Content-Type']='application/octet-stream';
+  else if(b) h['Content-Type']='application/json';
+  const url = (BASE && u.startsWith('/')) ? BASE + u : u;
+  const r = await fetch(url,{method:m,headers:h,body:raw?b:b?JSON.stringify(b):undefined,credentials:'include'});
+  let j={}; try{j=await r.json()}catch(e){}
+  if(r.status===401 && S.user && u!=='/api/logout'){ S.user=null; render(); }
+  if(!r.ok) throw new Error(j.error||('Error '+r.status));
+  return j;
+};
+
+async function load(){
+  try{
+    const j = await api('GET','/api/posts');
+    S.posts = j.posts || [];
+    S.me.bio = j.me?.bio || '';
+    S.me.av = j.me?.av || null;
+    S.fol = {}; (j.fol||[]).forEach(n=>S.fol[n]=true);
+    S.blocked = j.blocked || [];
+    S.stories = j.stories || [];
+    render();
+  }catch(e){ toast(e.message); }
+}
+
+async function loadExplore(){
+  try{
+    const j = await api('GET','/api/explore');
+    S.explore = j.posts || [];
+    render();
+  }catch(e){ toast(e.message); }
+}
+
+const fail = e => toast(e.message || 'Error');
+
+async function upload(f){
+  return (await api('POST','/api/upload',f,true)).file;
+}
+
+const H = {
+  like: i => api('POST','/api/posts/'+i+'/like'),
+  sv: i => api('POST','/api/posts/'+i+'/save'),
+  send: async i => {
+    const v = $('#ci')?.value.trim();
+    if(!v || !rl('c',1500)) return 1;
+    await api('POST','/api/posts/'+i+'/comments',{t:v});
+  },
+  del: i => api('DELETE','/api/posts/'+i),
+  rep: async i => { await api('POST','/api/posts/'+i+'/report'); toast('Report moklyu. Aabhar 🙏'); return 1; },
+  blk: n => api('POST','/api/users/'+n+'/block'),
+  fol: n => api('POST','/api/users/'+n+'/follow'),
+  savep: async () => { await api('PUT','/api/me',{bio:$('#bio').value}); toast('Profile save thai ✅'); return 1; },
+  delacc: async () => {
+    if(!S.dc){ S.dc=1; toast('Confirm mate fari tap karo'); setTimeout(()=>S.dc=0,4000); return 1; }
+    await api('DELETE','/api/me'); S.dc=0; out(); return 1;
+  },
+  publish: async () => {
+    const cap = ($('#cap')?.value||'').trim().slice(0,300);
+    if(!cap && !file){ toast('Kai to lakho ke upload karo'); return 1; }
+    if(!rl('p',3000)) return 1;
+    toast('Upload thai rahyu…');
+    const fn = file ? await upload(file) : null;
+    const k = kind==='post' ? (file ? 'photo' : 'text') : kind;
+    await api('POST','/api/posts',{k,cap,file:fn});
+    file=null; kind='post';
+    S.tab = k==='reel'?'reels':k==='video'?'videos':'home';
+    toast('Post thai gayu 🎉');
+  },
+  addstory: () => { $('#storyf').click(); return 1; },
+  openstory: i => {
+    S.storyView = {userIdx:+i, itemIdx:0};
+    render();
+    // auto advance
+    clearTimeout(S._st);
+    S._st = setTimeout(()=>storyNext(), 5000);
+    return 1;
+  },
+  closestory: () => { clearTimeout(S._st); S.storyView=null; render(); return 1; },
+  storytap: () => { storyNext(); return 1; }
+};
+
+function storyNext(){
+  if(!S.storyView) return;
+  const u = S.stories[S.storyView.userIdx];
+  if(!u) return H.closestory();
+  if(S.storyView.itemIdx < u.items.length-1){
+    S.storyView.itemIdx++;
+    render();
+    clearTimeout(S._st);
+    S._st = setTimeout(()=>storyNext(), 5000);
+  } else if(S.storyView.userIdx < S.stories.length-1){
+    S.storyView.userIdx++;
+    S.storyView.itemIdx=0;
+    render();
+    clearTimeout(S._st);
+    S._st = setTimeout(()=>storyNext(), 5000);
+  } else {
+    H.closestory();
+  }
+}
+
+const RL = {};
+const rl = (k,ms) => {
+  const t=Date.now();
+  if(t-(RL[k]||0)<ms){ toast('Thodu dhime…'); return false; }
+  RL[k]=t; return true;
+};
+
+const OK = ['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm'];
+const okf = (f,img) => {
+  if(!f) return false;
+  if(!OK.includes(f.type) || (img && !f.type.startsWith('image')) || f.size > (img?5e6:50e6)){
+    toast('Aa file nahi chale (type ke size)'); return false;
+  }
+  return true;
+};
+
+function authv(){
+  return `<div class="pad" style="max-width:360px;margin:40px auto">
+    <h2 style="margin-bottom:8px">Watch ma swagat chhe</h2>
+    <p style="color:var(--mut);font-size:14px;margin-bottom:16px">Instagram + Facebook + YouTube no mix</p>
+    <input id="an" maxlength="20" placeholder="Username (a-z, 0-9, _)" autocomplete="username">
+    <input id="ap" type="password" maxlength="64" placeholder="Password (8+, letter ane number)" autocomplete="current-password">
+    <div id="ae" style="color:var(--ac);min-height:22px;font-size:13px"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn ac" data-a="login">Login</button>
+      <button class="btn sub" data-a="signup">Sign up</button>
+    </div>
+  </div>`;
+}
+
+async function auth(su){
+  const n = ($('#an')?.value||'').trim().toLowerCase();
+  const pw = $('#ap')?.value || '';
+  const er = m => { const e=$('#ae'); if(e) e.textContent=m; };
+  try{
+    await api('POST', su?'/api/signup':'/api/login', {u:n, p:pw});
+    S.user = n; S.me.name = n;
+    await load();
+  }catch(e){ er(e.message); }
+}
+
+function out(){
+  fetch('/api/logout',{method:'POST',headers:{'X-W':'1'}}).catch(()=>{});
+  S.user=null; S.posts=[]; S.tab='home'; S.sheet=null; S.watch=null; S.storyView=null; S._viewed=new Set(); file=null;
+  render();
+}
+
+// events
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-a]');
+  if(!el) return;
+  const a = el.dataset.a, i = el.dataset.i;
+  lastAct = Date.now();
+
+  if(a==='login'||a==='signup'){ auth(a==='signup'); return; }
+  if(a==='logout'){ out(); return; }
+  if(a==='tab'){
+    S.tab=i; S.watch=null; S.sheet=null; file=null; kind='post';
+    if(i==='explore') loadExplore();
+    else render();
+    return;
+  }
+  if(a==='kind'){
+    kind=i;
+    document.querySelectorAll('.kb').forEach(b=>b.classList.toggle('on', b.dataset.i===i));
+    return;
+  }
+  if(a==='pt'){ S.pt=i; render(); return; }
+  if(a==='play'){ S.tab='videos'; S.watch=+i; render(); return; }
+  if(a==='goreel'){ S.tab='reels'; render(); setTimeout(()=>{ const r=$('#r'+i); r&&r.scrollIntoView({behavior:'smooth'}); },40); return; }
+  if(a==='back'){ S.watch=null; render(); return; }
+  if(a==='subs'){ S.subs[i]=!S.subs[i]; render(); return; }
+  if(a==='close'){ S.sheet=null; render(); return; }
+  if(a==='cm'){ S.sheet=+i; render(); return; }
+  if(a==='dblike'){ /* double tap like could be added */ return; }
+
+  if(H[a]){
+    e.stopImmediatePropagation();
+    try{
+      const skip = await H[a](i);
+      if(!skip) await load();
+    }catch(x){ fail(x); }
+  }
+}, true);
+
+document.addEventListener('change', async e => {
+  if(e.target.id==='mf'){
+    const f=e.target.files[0];
+    file = okf(f,false) ? f : null;
+    if(!file) e.target.value='';
+    $('#fn').textContent = file ? file.name : '';
+  }
+  if(e.target.id==='avf'){
+    const f=e.target.files[0];
+    if(!okf(f,true)) return;
+    try{
+      const fn = await upload(f);
+      await api('PUT','/api/me',{bio:S.me.bio, av:fn});
+      await load();
+    }catch(x){ fail(x); }
+  }
+  if(e.target.id==='storyf'){
+    const f=e.target.files[0];
+    if(!okf(f,false)) return;
+    try{
+      toast('Story upload thai rahyu…');
+      const fn = await upload(f);
+      await api('POST','/api/stories',{file:fn});
+      toast('Story live thai 🎉');
+      await load();
+    }catch(x){ fail(x); }
+  }
+});
+
+document.addEventListener('click', e => {
+  if(e.target.closest('#pav')) $('#avf').click();
+});
+
+$('#th').onclick = () => {
+  const r = document.documentElement;
+  const d = r.dataset.theme==='dark' || (!r.dataset.theme && matchMedia('(prefers-color-scheme:dark)').matches);
+  r.dataset.theme = d ? 'light' : 'dark';
+};
+
+$('#q').addEventListener('input', e => {
+  Q = e.target.value.trim().toLowerCase().slice(0,40);
+  if(S.user) render();
+});
+
+document.addEventListener('keydown', e => {
+  lastAct = Date.now();
+  if(e.key==='Enter' && e.target.id==='ap') auth(false);
+  if(e.key==='Escape' && S.storyView) H.closestory();
+});
+
+let lastAct = Date.now();
+setInterval(() => {
+  if(S.user && Date.now()-lastAct > 15*60*1000){ out(); toast('Idle hova thi logout thayu'); }
+}, 30000);
+
+// boot
+(async () => {
+  try {
+    const c = await fetch('./config.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    if (c.serverUrl) BASE = c.serverUrl.replace(/\/$/, '');
+  } catch(e) {}
+  try {
+    const j = await api('GET','/api/me');
+    S.user = j.u; S.me.name = j.u;
+    await load();
+  } catch(e) { render(); }
+})();
+</script>
+</body>
+</html>

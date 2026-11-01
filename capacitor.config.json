@@ -1,0 +1,9 @@
+{
+  "appId": "app.watch.social",
+  "appName": "Watch",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  }
+}
