@@ -35,13 +35,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
+      - name: Clear Gradle Cache
+        run: rm -rf ~/.gradle/caches/
+
       - name: Add Android Platform and Build
         run: |
           npx --yes @capacitor/cli add android || true
           npx --yes @capacitor/cli sync android
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --refresh-dependencies --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
