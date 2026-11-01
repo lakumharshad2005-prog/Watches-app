@@ -1,3 +1,4 @@
+
 name: Build Android debug APK
 
 on:
@@ -36,15 +37,20 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Clear Gradle Cache
-        run: rm -rf ~/.gradle/caches/
+        run: rm -rf ~/.gradle/caches/ ~/.gradle/wrapper/
 
-      - name: Add Android Platform and Build
+      - name: Add Android Platform and Sync
         run: |
           npx --yes @capacitor/cli add android || true
           npx --yes @capacitor/cli sync android
+
+      - name: Fix Gradle Build & Compile APK
+        run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          # Clean any locked/corrupted daemons or locks
+          ./gradlew --stop || true
+          ./gradlew clean assembleDebug --no-daemon --refresh-dependencies
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
