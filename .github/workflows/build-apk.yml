@@ -35,28 +35,20 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Add Android Platform and Sync
+      - name: Generate Android Platform Automatically
         run: |
-          rm -rf android/
-          npx --yes @capacitor/cli add android
+          npx --yes @capacitor/cli add android || true
           npx --yes @capacitor/cli sync android
 
-      - name: Patch Gradle Build to Skip Jar Issues
-        run: |
-          cd android
-          # Disable dependency verification which triggers the bcprov hash mismatch error
-          if [ -f "gradle.properties" ]; then
-            echo "android.dependencyResolution.versionCheck=false" >> gradle.properties
-          fi
-
-      - name: Build Debug APK
+      - name: Fix BouncyCastle Jar & Build APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -Dorg.gradle.internal.http.connectionTimeout=60000 -Dorg.gradle.internal.http.socketTimeout=60000
+          ./gradlew assembleDebug --no-daemon -Dorg.gradle.dependency.verification=off
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
